@@ -1,10 +1,15 @@
 const express = require('express')
+const cors = require('cors')
 require('./db/mongoose')
 const userRouter = require('./routers/user')
 
 const app = express()
 const port = process.envPORT || 3000
 
+app.use(cors({
+        origin: "*",
+        methods: ['GET', 'POST', 'PATCH', 'DELETE', 'UPDATE', 'PATCH']}
+))
 
 app.use(express.json())
 app.use(userRouter)

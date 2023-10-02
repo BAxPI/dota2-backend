@@ -2,16 +2,15 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const Task = require('../models/task')
 
 // -------------------------- User Model ---------------------------------
 const userSchema = new mongoose.Schema({
-    firstName: {
+    firstname: {
         type: String,
         required: true,
         trim: true
     },
-    lastName: {
+    lastname: {
         type: String,
         trim: true
     },
@@ -26,6 +25,10 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
+    username: {
+        type: String, 
+        unique: true
+    },
     password: {
         type: String,
         required: true,
@@ -38,8 +41,8 @@ const userSchema = new mongoose.Schema({
         }
     },
     steam32_id: { 
-        type: String, 
-        require: true
+        type: String 
+        // require: true
         // TODO: add validation that steam32_id exist
     },
     tokens: [{
@@ -71,8 +74,9 @@ userSchema.methods.generateAuthToken = async function () {
     return token
 }
 
-userSchema.statics.findByCredentials = async (email, password) => {
-    const user = await User.findOne({email})
+userSchema.statics.findByCredentials = async (emailOrUsername,password) => {
+    const user = await User.findOne({$or: [{username: emailOrUsername}, {email: emailOrUsername}]})
+    console.log("user", user)
     if (!user) {
         throw new Error('Unable to login')
     }

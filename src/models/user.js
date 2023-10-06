@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const axios = require('axios')
 
 // -------------------------- User Model ---------------------------------
 const userSchema = new mongoose.Schema({
@@ -41,8 +42,8 @@ const userSchema = new mongoose.Schema({
         }
     },
     steam32_id: { 
-        type: String 
-        // require: true
+        type: String,
+        require: true
         // TODO: add validation that steam32_id exist
     },
     tokens: [{
@@ -68,13 +69,26 @@ userSchema.methods.toJSON = function () {
 userSchema.methods.generateAuthToken = async function () {
     const user = this
     const token = jwt.sign({_id: user._id.toString()}, "BAxPI-dota2")
-    
     user.tokens = user.tokens.concat({token})
     await user.save()
     return token
 }
 
+userSchema.methods.getUserOverview = async function (steam32_id) {
+    const user = this
+    let userOverview = {}
+
+    let response = await axios.get("https://api.opendota.com/api/players/" + steam32_id + "/matches")
+    userOverview.totalMatches = response.data.length
+     
+    response = await axios.get("https://api.opendota.com/api/players/" + steam32_id + "/wl")
+    userOverview.wlRatio = response.data.win / response.data.lose
+
+    return userOverview
+}
+
 userSchema.statics.findByCredentials = async (emailOrUsername,password) => {
+    console.log("Credentials recieved:", emailOrUsername, password)
     const user = await User.findOne({$or: [{username: emailOrUsername}, {email: emailOrUsername}]})
     console.log("user", user)
     if (!user) {

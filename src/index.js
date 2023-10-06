@@ -7,8 +7,9 @@ const app = express()
 const port = process.envPORT || 3000
 
 app.use(cors({
-        origin: "*",
+        origin: "http://localhost:3001",
         methods: ['GET', 'POST', 'PATCH', 'DELETE', 'UPDATE', 'PATCH']}
+        
 ))
 
 app.use(express.json())

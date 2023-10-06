@@ -27,7 +27,7 @@ router.post('/users', async (req, res) => {
 // Login to an existing user.
 router.post('/users/login', async (req, res) => {
     try {
-        const user = await User.findByCredentials(req.body.emailOrUsername, req.body.password)
+        const user = await User.findByCredentials(req.body.usernameEmail, req.body.password)
         const token = await user.generateAuthToken()
         res.send({user, token})
     } catch (e) {
@@ -60,7 +60,15 @@ router.post('/users/logoutAll', auth, async (req, res) => {
 
 // Get profile data
 router.get('/users/me',auth , async (req, res) => {
-    res.send(req.user)
+    // console.log("From user api:", req.user)
+    const userOverview = await req.user.getUserOverview(req.user.steam32_id)
+    console.log(userOverview)
+    userOverview.username = req.user.username
+    res.send(userOverview)
+})
+
+router.get('users/me/overview', auth, async (req, res) => {
+        
 })
 
 // Update profile data
